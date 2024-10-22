@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+//log
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -36,8 +38,15 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, $id)
     {
+        // Log cuando la función update es llamada con el ID del usuario
+        Log::info('Entering update function with ID: ' . $id);
+
+        // Buscar el usuario
+        $user = User::findOrFail($id);
+
+        // Validación de los datos
         $validatedData = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'lastname' => 'sometimes|required|string|max:255',
@@ -45,9 +54,20 @@ class UserController extends Controller
             'password' => 'sometimes|required|string|min:8',
         ]);
 
+        // Log de los datos validados
+        Log::info('Validated data: ', $validatedData);
+
+        // Actualizar el usuario con los datos validados
         $user->update($validatedData);
 
-        return response()->json($user);
+        // Log de éxito en la actualización
+        Log::info('User updated successfully: ', $user->toArray());
+
+        // Respuesta JSON con éxito
+        return response()->json([
+            'message' => 'User update success',
+            'user' => $user
+        ]);
     }
 
     /**
